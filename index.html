@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lesson 4 Vocabulary: Layers of Defense</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=Lexend:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --deep: #0F3D3E;
+    --deeper: #0A2B2C;
+    --ice: #E8F1F2;
+    --panel: #FFFFFF;
+    --slate: #3A506B;
+    --amber: #F2A541;
+    --good: #1E8A5A;
+    --bad: #C2410C;
+    --line: #C9D8DA;
+    --ink: #10282A;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *, *::before, *::after { box-sizing: inherit; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0;
+    background: var(--ice);
+    color: var(--ink);
+    font-family: "Lexend", "Segoe UI", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.55;
+  }
+  header {
+    background: var(--deep);
+    color: var(--ice);
+    padding: 28px 20px 0;
+  }
+  .hero {
+    max-width: 900px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 24px;
+    align-items: center;
+  }
+  .rings { width: 150px; height: 150px; }
+  .rings circle.ring { fill: none; stroke: #2C6667; stroke-width: 9; transition: stroke 0.4s ease; }
+  .rings circle.ring.on { stroke: var(--amber); }
+  h1 {
+    font-family: "Chakra Petch", "Arial Narrow", sans-serif;
+    font-weight: 700;
+    font-size: clamp(30px, 5.5vw, 46px);
+    line-height: 1.05;
+    margin: 0 0 8px;
+  }
+  .hero p { margin: 0; color: #BFD7D8; max-width: 520px; }
+  .who {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .who label { font-weight: 600; }
+  .who input {
+    font: inherit;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 2px solid #2C6667;
+    background: var(--deeper);
+    color: var(--ice);
+    width: 220px;
+  }
+  nav {
+    max-width: 900px;
+    margin: 22px auto 0;
+    display: flex;
+    gap: 4px;
+  }
+  nav button {
+    font-family: "Chakra Petch", "Arial Narrow", sans-serif;
+    font-weight: 700;
+    font-size: 17px;
+    background: transparent;
+    color: #BFD7D8;
+    border: 0;
+    padding: 12px 20px;
+    border-radius: 10px 10px 0 0;
+    cursor: pointer;
+  }
+  nav button[aria-selected="true"] { background: var(--ice); color: var(--deep); }
+  main { max-width: 900px; margin: 0 auto; padding: 24px 16px 48px; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  button { font: inherit; }
+  button:focus-visible, input:focus-visible { outline: 3px solid var(--amber); outline-offset: 2px; }
+  .btn {
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 2px solid var(--deep);
+    background: var(--panel);
+    color: var(--deep);
+    cursor: pointer;
+  }
+  .btn.primary { background: var(--deep); color: var(--ice); }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+  /* Flashcards */
+  .card-wrap { perspective: 1200px; margin: 0 auto 18px; max-width: 620px; }
+  .card {
+    position: relative;
+    height: 280px;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+    cursor: pointer;
+  }
+  .card.flipped { transform: rotateY(180deg); }
+  .face {
+    position: absolute; inset: 0;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    padding: 28px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+    text-align: center;
+  }
+  .front { background: var(--deep); color: var(--ice); }
+  .front .term { font-family: "Chakra Petch", "Arial Narrow", sans-serif; font-weight: 700; font-size: clamp(30px, 6vw, 44px); }
+  .front .expand { color: #BFD7D8; margin-top: 6px; }
+  .back { background: var(--panel); border: 3px solid var(--deep); transform: rotateY(180deg); font-size: 18px; }
+  .hint { text-align: center; color: var(--slate); font-size: 15px; margin: 0 0 14px; }
+  .counter { color: var(--slate); font-weight: 600; }
+
+  /* Matching */
+  .match-grid { display: grid; grid-template-columns: 1fr 1.6fr; gap: 14px; margin: 16px 0; }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+  .tile {
+    text-align: left;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 2px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .tile.term { font-family: "Chakra Petch", "Arial Narrow", sans-serif; font-weight: 700; font-size: 18px; }
+  .tile.selected { border-color: var(--amber); box-shadow: 0 0 0 2px var(--amber); }
+  .tile.done { border-color: var(--good); background: #E3F4EC; color: #145C3D; cursor: default; }
+  .tile.wrong { border-color: var(--bad); animation: shake 0.35s; }
+  @keyframes shake { 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+  /* Quiz */
+  .q-box { background: var(--panel); border-radius: 14px; padding: 22px; border: 2px solid var(--line); }
+  .q-meta { display: flex; justify-content: space-between; color: var(--slate); font-weight: 600; margin-bottom: 10px; font-size: 15px; }
+  .q-prompt { font-size: 19px; margin: 0 0 16px; }
+  .q-prompt strong { font-family: "Chakra Petch", "Arial Narrow", sans-serif; font-size: 24px; }
+  .opts { display: grid; gap: 10px; }
+  .opt {
+    text-align: left;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 2px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .opt:hover:not(:disabled) { border-color: var(--slate); }
+  .opt.right { border-color: var(--good); background: #E3F4EC; }
+  .opt.picked-wrong { border-color: var(--bad); background: #FCEBE3; }
+  .opt:disabled { cursor: default; }
+  .feedback { margin-top: 14px; font-weight: 600; min-height: 1.5em; }
+  .feedback.good { color: var(--good); }
+  .feedback.bad { color: var(--bad); }
+  .progress { height: 8px; background: var(--line); border-radius: 4px; margin-bottom: 16px; overflow: hidden; }
+  .progress span { display: block; height: 100%; width: 0; background: var(--amber); transition: width 0.3s; }
+  .result { background: var(--panel); border-radius: 14px; padding: 24px; border: 2px solid var(--deep); }
+  .result h2 { font-family: "Chakra Petch", "Arial Narrow", sans-serif; margin: 0 0 4px; font-size: 28px; }
+  .result .score { font-family: "Chakra Petch", "Arial Narrow", sans-serif; font-size: 56px; color: var(--deep); line-height: 1.1; }
+  .missed li { margin-bottom: 8px; }
+  .intro { background: var(--panel); border-radius: 14px; padding: 22px; border: 2px solid var(--line); }
+  .intro h2, .panel > h2 { font-family: "Chakra Petch", "Arial Narrow", sans-serif; margin: 0 0 6px; }
+
+  @media (max-width: 640px) {
+    .hero { grid-template-columns: 1fr; text-align: left; }
+    .rings { width: 100px; height: 100px; }
+    .match-grid { grid-template-columns: 1fr; }
+    nav button { padding: 10px 12px; font-size: 15px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card, .rings circle.ring, .progress span { transition: none; }
+    .tile.wrong { animation: none; }
+  }
+  @media print {
+    header nav, .btn, #flash, #match, .q-box { display: none !important; }
+    header { background: none; color: var(--ink); }
+    .hero p { color: var(--ink); }
+    .rings { display: none; }
+    .hero { grid-template-columns: 1fr; }
+    .who input { border: 0; background: none; color: var(--ink); }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="hero">
+    <svg class="rings" viewBox="0 0 150 150" aria-hidden="true">
+      <circle class="ring" cx="75" cy="75" r="68"/>
+      <circle class="ring" cx="75" cy="75" r="55"/>
+      <circle class="ring" cx="75" cy="75" r="42"/>
+      <circle class="ring" cx="75" cy="75" r="29"/>
+      <circle class="ring" cx="75" cy="75" r="16"/>
+      <rect x="69" y="72" width="12" height="10" rx="2" fill="#F2A541"/>
+      <path d="M71.5 72v-3a3.5 3.5 0 0 1 7 0v3" fill="none" stroke="#F2A541" stroke-width="2"/>
+    </svg>
+    <div>
+      <h1>Lesson 4: Layers of Defense</h1>
+      <p>Study the 15 vocabulary terms, practice matching, then take the quiz. Each layer lights up as your best quiz score climbs.</p>
+      <div class="who">
+        <label for="studentName">Your name</label>
+        <input id="studentName" type="text" autocomplete="off">
+      </div>
+    </div>
+  </div>
+  <nav role="tablist" aria-label="Game modes">
+    <button role="tab" aria-selected="true" data-tab="flash">Flashcards</button>
+    <button role="tab" aria-selected="false" data-tab="match">Match</button>
+    <button role="tab" aria-selected="false" data-tab="quiz">Quiz</button>
+  </nav>
+</header>
+
+<main>
+  <!-- Flashcards -->
+  <section class="panel active" id="flash" role="tabpanel">
+    <p class="hint">Tap the card or press the space bar to flip it. Use the arrow keys to move between cards.</p>
+    <div class="card-wrap">
+      <div class="card" id="card" tabindex="0" role="button" aria-label="Flip card">
+        <div class="face front"><div class="term" id="cardTerm"></div><div class="expand" id="cardExpand"></div></div>
+        <div class="face back"><div id="cardDef"></div></div>
+      </div>
+    </div>
+    <div class="row" style="justify-content:center">
+      <button class="btn" id="prevCard" type="button">Previous</button>
+      <span class="counter" id="cardCount"></span>
+      <button class="btn" id="nextCard" type="button">Next</button>
+      <button class="btn" id="shuffleCards" type="button">Shuffle</button>
+    </div>
+  </section>
+
+  <!-- Matching -->
+  <section class="panel" id="match" role="tabpanel">
+    <h2 id="matchTitle">Match: round 1 of 3</h2>
+    <p style="margin:0">Pick a term, then pick its definition. Try to match every pair on the first try.</p>
+    <div class="match-grid">
+      <div class="col" id="matchTerms"></div>
+      <div class="col" id="matchDefs"></div>
+    </div>
+    <p id="matchStatus" class="feedback"></p>
+    <div class="row">
+      <button class="btn primary" id="matchNext" type="button" disabled>Next round</button>
+      <button class="btn" id="matchRestart" type="button">Start over</button>
+    </div>
+  </section>
+
+  <!-- Quiz -->
+  <section class="panel" id="quiz" role="tabpanel">
+    <div class="intro" id="quizIntro">
+      <h2>Vocabulary quiz</h2>
+      <p>15 questions, one for each term. Some questions give you a definition and ask for the term; others give you a term and ask for its definition. You'll see the right answer after each question, and your score at the end.</p>
+      <button class="btn primary" id="startQuiz" type="button">Start quiz</button>
+    </div>
+    <div class="q-box" id="qBox" hidden>
+      <div class="progress"><span id="qProg"></span></div>
+      <div class="q-meta"><span id="qNum"></span><span id="qScore"></span></div>
+      <p class="q-prompt" id="qPrompt"></p>
+      <div class="opts" id="qOpts"></div>
+      <p class="feedback" id="qFeedback" aria-live="polite"></p>
+      <button class="btn primary" id="qNext" type="button" hidden>Next question</button>
+    </div>
+    <div class="result" id="qResult" hidden></div>
+  </section>
+</main>
+
+<script>
+const VOCAB = [
+  { term: "Defense-in-Depth",
+    short: "Using many layers of protection so one failure doesn't leave a system open.",
+    full: "A security strategy that uses multiple layers of protection so that if one part is broken, other parts still keep things safe. It's like locking your house with several doors and alarms to make it harder for someone to get in." },
+  { term: "Security",
+    short: "Protecting information, systems, and devices from theft, damage, or misuse.",
+    full: "Protecting important information, systems, or devices from being stolen, damaged, or used by people who shouldn't have access to them." },
+  { term: "Threats",
+    short: "Anything that can harm a system, like hackers, viruses, or natural disasters.",
+    full: "Anything that can harm a computer system or network, such as hackers, viruses, or even natural disasters like floods." },
+  { term: "Redundancy",
+    short: "Backups or extra systems ready to take over if something fails.",
+    full: "Having backups or extra systems in place in case something goes wrong, like having a spare tire in your car in case you get a flat." },
+  { term: "Resilience",
+    short: "A system's ability to recover quickly and keep working after a problem.",
+    full: "The ability of a system to recover quickly and keep working even after something goes wrong, like a website staying online after a cyberattack." },
+  { term: "Detection",
+    short: "Finding out that something suspicious or harmful is happening.",
+    full: "The process of finding out if something suspicious or harmful is happening, such as spotting a hacker trying to break into a computer." },
+  { term: "Network",
+    short: "A group of connected devices that can share information with each other.",
+    full: "A group of connected computers or devices that can share information with each other, like the Internet or the Wi-Fi at school." },
+  { term: "Segmenting",
+    short: "Dividing a network into smaller parts so an attack stays contained.",
+    full: "Dividing a network into smaller parts so that if one part is attacked, the other parts stay safe, like locking different rooms in a house to contain a problem." },
+  { term: "Intrusion",
+    short: "Getting into a computer or network without permission.",
+    full: "When someone tries to get into a computer or network without permission, like a burglar sneaking into a house." },
+  { term: "Prevention",
+    short: "Actions taken to stop problems before they happen, like using firewalls.",
+    full: "Actions taken to stop problems before they happen, such as using firewalls and antivirus software to block hackers." },
+  { term: "Encryption",
+    short: "Changing information into code so only someone with the key can read it.",
+    full: "Changing information so only people with the correct password or key can read it. It's like turning a message into code that only a trusted friend can decode." },
+  { term: "Decryption",
+    short: "Turning coded information back into its original, readable form.",
+    full: "The process of turning encrypted (coded) information back into its original form so it can be read and understood." },
+  { term: "Vulnerability",
+    short: "A weakness in a system that an attacker can use to break in.",
+    full: "A weakness in a system that hackers can use to break in, like an unlocked door on a secure building." },
+  { term: "IDS", expand: "Intrusion Detection System",
+    short: "A tool that watches a network and sends an alert when something is unusual.",
+    full: "A tool that watches for suspicious activity in a network and alerts people when something unusual happens, like a burglar alarm going off." },
+  { term: "IPS", expand: "Intrusion Prevention System",
+    short: "A tool that detects suspicious activity and automatically blocks it.",
+    full: "A tool that not only detects suspicious activity but also blocks it before it can cause harm, like an automatic lock that shuts when someone tries to break in." }
+];
+
+const shuffle = a => { const b = a.slice(); for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+/* Tabs */
+document.querySelectorAll("nav button").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll("nav button").forEach(b => b.setAttribute("aria-selected", b === btn));
+    document.querySelectorAll(".panel").forEach(p => p.classList.toggle("active", p.id === btn.dataset.tab));
+  });
+});
+
+/* Flashcards */
+let deck = VOCAB.slice(), cardIdx = 0;
+const card = document.getElementById("card");
+function showCard() {
+  const v = deck[cardIdx];
+  card.classList.remove("flipped");
+  document.getElementById("cardTerm").textContent = v.term;
+  document.getElementById("cardExpand").textContent = v.expand || "";
+  document.getElementById("cardDef").textContent = v.full;
+  document.getElementById("cardCount").textContent = (cardIdx + 1) + " of " + deck.length;
+}
+card.addEventListener("click", () => card.classList.toggle("flipped"));
+card.addEventListener("keydown", e => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); card.classList.toggle("flipped"); } });
+document.getElementById("prevCard").onclick = () => { cardIdx = (cardIdx - 1 + deck.length) % deck.length; showCard(); };
+document.getElementById("nextCard").onclick = () => { cardIdx = (cardIdx + 1) % deck.length; showCard(); };
+document.getElementById("shuffleCards").onclick = () => { deck = shuffle(VOCAB); cardIdx = 0; showCard(); };
+document.addEventListener("keydown", e => {
+  if (!document.getElementById("flash").classList.contains("active")) return;
+  if (e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowRight") document.getElementById("nextCard").click();
+  if (e.key === "ArrowLeft") document.getElementById("prevCard").click();
+});
+showCard();
+
+/* Matching */
+let rounds = [], roundIdx = 0, selTerm = null, matchedCount = 0, firstTry = 0, missedPairs = new Set();
+function startMatch() {
+  const s = shuffle(VOCAB);
+  rounds = [s.slice(0, 5), s.slice(5, 10), s.slice(10, 15)];
+  roundIdx = 0; firstTry = 0;
+  buildRound();
+}
+function buildRound() {
+  const items = rounds[roundIdx];
+  selTerm = null; matchedCount = 0; missedPairs = new Set();
+  document.getElementById("matchTitle").textContent = "Match: round " + (roundIdx + 1) + " of 3";
+  document.getElementById("matchStatus").textContent = "";
+  document.getElementById("matchStatus").className = "feedback";
+  document.getElementById("matchNext").disabled = true;
+  document.getElementById("matchNext").textContent = roundIdx < 2 ? "Next round" : "See results";
+  const tCol = document.getElementById("matchTerms"), dCol = document.getElementById("matchDefs");
+  tCol.innerHTML = ""; dCol.innerHTML = "";
+  shuffle(items).forEach(v => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tile term"; b.textContent = v.term; b.dataset.term = v.term;
+    b.onclick = () => {
+      if (b.classList.contains("done")) return;
+      tCol.querySelectorAll(".tile").forEach(t => t.classList.remove("selected"));
+      b.classList.add("selected"); selTerm = b;
+    };
+    tCol.appendChild(b);
+  });
+  shuffle(items).forEach(v => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tile"; b.textContent = v.short; b.dataset.term = v.term;
+    b.onclick = () => {
+      if (b.classList.contains("done") || !selTerm) {
+        if (!selTerm) { const st = document.getElementById("matchStatus"); st.textContent = "Pick a term first."; st.className = "feedback bad"; }
+        return;
+      }
+      const st = document.getElementById("matchStatus");
+      if (b.dataset.term === selTerm.dataset.term) {
+        b.classList.add("done"); selTerm.classList.remove("selected"); selTerm.classList.add("done");
+        if (!missedPairs.has(b.dataset.term)) firstTry++;
+        selTerm = null; matchedCount++;
+        st.textContent = "Matched."; st.className = "feedback good";
+        if (matchedCount === items.length) {
+          st.textContent = "Round complete.";
+          document.getElementById("matchNext").disabled = false;
+        }
+      } else {
+        missedPairs.add(selTerm.dataset.term);
+        b.classList.remove("wrong"); void b.offsetWidth; b.classList.add("wrong");
+        st.textContent = "Not a match. Try another definition."; st.className = "feedback bad";
+      }
+    };
+    dCol.appendChild(b);
+  });
+}
+document.getElementById("matchNext").onclick = () => {
+  if (roundIdx < 2) { roundIdx++; buildRound(); return; }
+  document.getElementById("matchTitle").textContent = "Matching complete";
+  document.getElementById("matchTerms").innerHTML = "";
+  document.getElementById("matchDefs").innerHTML = "";
+  const st = document.getElementById("matchStatus");
+  st.className = "feedback good";
+  st.textContent = "You matched " + firstTry + " of 15 pairs on the first try. " + (firstTry >= 13 ? "You're ready for the quiz." : "Review the flashcards, then try again or take the quiz.");
+  document.getElementById("matchNext").disabled = true;
+};
+document.getElementById("matchRestart").onclick = startMatch;
+startMatch();
+
+/* Quiz */
+// Builds a question where the correct answer is never the single longest option.
+function buildQuestion(v, preferDir) {
+  const others = VOCAB.filter(o => o !== v);
+  const tryDir = dir => {
+    const key = dir === "defToTerm" ? "term" : "short";
+    const correct = v[key];
+    for (let attempt = 0; attempt < 80; attempt++) {
+      const picks = shuffle(others).slice(0, 3);
+      const longestDistractor = Math.max(...picks.map(p => p[key].length));
+      if (longestDistractor >= correct.length) {
+        return { v, dir, correct, options: shuffle([correct, ...picks.map(p => p[key])]) };
+      }
+    }
+    return null;
+  };
+  return tryDir(preferDir) || tryDir(preferDir === "defToTerm" ? "termToDef" : "defToTerm");
+}
+
+let quiz = [], qIdx = 0, qCorrect = 0, missed = [], bestPct = 0;
+function startQuiz() {
+  quiz = shuffle(VOCAB).map((v, i) => buildQuestion(v, i % 2 === 0 ? "defToTerm" : "termToDef"));
+  quiz = shuffle(quiz);
+  qIdx = 0; qCorrect = 0; missed = [];
+  document.getElementById("quizIntro").hidden = true;
+  document.getElementById("qResult").hidden = true;
+  document.getElementById("qBox").hidden = false;
+  showQ();
+}
+function showQ() {
+  const q = quiz[qIdx];
+  document.getElementById("qNum").textContent = "Question " + (qIdx + 1) + " of " + quiz.length;
+  document.getElementById("qScore").textContent = qCorrect + " correct";
+  document.getElementById("qProg").style.width = (qIdx / quiz.length * 100) + "%";
+  const p = document.getElementById("qPrompt");
+  if (q.dir === "defToTerm") p.innerHTML = "Which term matches this definition?<br>" + esc(q.v.short);
+  else p.innerHTML = "What does <strong>" + esc(q.v.term) + "</strong> mean?";
+  const box = document.getElementById("qOpts"); box.innerHTML = "";
+  q.options.forEach(o => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "opt"; b.textContent = o;
+    b.onclick = () => answer(b, o);
+    box.appendChild(b);
+  });
+  const fb = document.getElementById("qFeedback"); fb.textContent = ""; fb.className = "feedback";
+  document.getElementById("qNext").hidden = true;
+}
+function answer(btn, choice) {
+  const q = quiz[qIdx];
+  const opts = document.querySelectorAll("#qOpts .opt");
+  opts.forEach(o => { o.disabled = true; if (o.textContent === q.correct) o.classList.add("right"); });
+  const fb = document.getElementById("qFeedback");
+  if (choice === q.correct) {
+    qCorrect++;
+    fb.textContent = "Correct."; fb.className = "feedback good";
+  } else {
+    btn.classList.add("picked-wrong");
+    missed.push(q.v);
+    fb.textContent = "Not quite. The correct answer is highlighted in green."; fb.className = "feedback bad";
+  }
+  document.getElementById("qScore").textContent = qCorrect + " correct";
+  const nx = document.getElementById("qNext");
+  nx.textContent = qIdx < quiz.length - 1 ? "Next question" : "See my score";
+  nx.hidden = false; nx.focus();
+}
+document.getElementById("qNext").onclick = () => {
+  if (qIdx < quiz.length - 1) { qIdx++; showQ(); } else finishQuiz();
+};
+function finishQuiz() {
+  document.getElementById("qBox").hidden = true;
+  const pct = Math.round(qCorrect / quiz.length * 100);
+  bestPct = Math.max(bestPct, pct);
+  lightRings();
+  const name = document.getElementById("studentName").value.trim() || "Student";
+  const when = new Date().toLocaleString();
+  let html = "<h2>" + esc(name) + "'s results</h2>" +
+    "<div class='score'>" + qCorrect + " / " + quiz.length + "</div>" +
+    "<p><strong>" + pct + "%</strong>, completed " + esc(when) + "</p>";
+  if (missed.length) {
+    html += "<p><strong>Terms to review:</strong></p><ul class='missed'>" +
+      missed.map(v => "<li><strong>" + esc(v.term) + ":</strong> " + esc(v.full) + "</li>").join("") + "</ul>";
+  } else {
+    html += "<p>Perfect score. Every layer is secure.</p>";
+  }
+  html += "<div class='row'><button class='btn primary' type='button' id='retake'>Take the quiz again</button>" +
+          "<button class='btn' type='button' id='printRes'>Print or save results</button></div>";
+  const r = document.getElementById("qResult");
+  r.innerHTML = html; r.hidden = false;
+  document.getElementById("retake").onclick = startQuiz;
+  document.getElementById("printRes").onclick = () => window.print();
+}
+function lightRings() {
+  const rings = document.querySelectorAll(".rings circle.ring");
+  const lit = Math.round(bestPct / 20);
+  rings.forEach((c, i) => c.classList.toggle("on", i < lit));
+}
+document.getElementById("startQuiz").onclick = startQuiz;
+</script>
+</body>
+</html>
